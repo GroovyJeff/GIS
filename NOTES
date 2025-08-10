@@ -1,0 +1,5 @@
+Test push of NOTES file
+
+git add NOTES
+git commit NOTES
+git push origin master
