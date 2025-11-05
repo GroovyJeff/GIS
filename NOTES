@@ -4,3 +4,9 @@ git add NOTES
 git commit NOTES
 git push origin main
 
+TODO: explain how/where to get maps and how to convert them to PNG
+
+TODO: explain the .png.aux.xml files (and how they are identical and could be symlinks)
+
+
+
