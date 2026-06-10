@@ -1,4 +1,5 @@
-# don't push emacs droppings or temp files nor symlink to GADM directory (note that this line itself isn't a comment but is highly unlikely to match anything useful)
+# don't push emacs droppings/tempfiles nor symlink to GADM directory
 *~
-#*#
+\#*\#
+\.\#*
 GADM
