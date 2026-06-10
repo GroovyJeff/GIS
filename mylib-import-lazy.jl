@@ -55,8 +55,11 @@ LazyModules.@lazy import GoogleGenAI = "903d41d1-eaca-47dd-943b-fee3930375ab"
 LazyModules.@lazy import GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
 LazyModules.@lazy import Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 LazyModules.@lazy import GridInterpolations = "bb4c363b-b914-514b-8517-4eb369bc008a"
-LazyModules.@lazy import Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
-LazyModules.@lazy import Gtk4 = "9db2cae5-386f-4011-9d63-a5602296539b"
+
+# can apparently only load once of these, so loading neither for now
+# LazyModules.@lazy import Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+# LazyModules.@lazy import Gtk4 = "9db2cae5-386f-4011-9d63-a5602296539b"
+
 LazyModules.@lazy import HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 LazyModules.@lazy import HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 LazyModules.@lazy import HighVoronoi = "1d30c219-805f-47bd-9cb8-33f291c94a4c"
