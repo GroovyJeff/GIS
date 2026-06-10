@@ -40,7 +40,9 @@ LazyModules.@lazy import Extents = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
 LazyModules.@lazy import FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 LazyModules.@lazy import FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 LazyModules.@lazy import FuseApi = "67451fab-d9b0-4aa1-a584-3691f4a673db"
-LazyModules.@lazy import GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+
+# LazyModules.@lazy import GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+
 LazyModules.@lazy import GeoFormatTypes = "68eda718-8dee-11e9-39e7-89f7f65f511f"
 LazyModules.@lazy import GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 LazyModules.@lazy import GeoJSON = "61d90e0f-e114-555e-ac52-39dfb47a3ef9"
