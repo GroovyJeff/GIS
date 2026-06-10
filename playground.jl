@@ -1,9 +1,11 @@
-
 # To use: cut and paste section of interest; each section is actually commented out so you can't load this file directly
 
-#= TIMESTAMP 20260610.072430
+# these includes are universal to all sections
 
 include("mylib-import-lazy.jl")
+include("mylib.jl")
+
+#= TIMESTAMP 20260610.072430
 
 # let's create a function takes a shapefile name and returns a matrix indicating category of each pixel
 
@@ -25,6 +27,8 @@ my_data = GeoDataFrames.read(s)
 my_extent = Extents.Extent(X=(-180, 180), Y=(-90, 90))
 
 my_rasters =  Rasters.boolmask(my_data; to = my_extent, size=(w,h), collapse = false, boundary=:touches);
+
+optional(1, pwd())
 
 
 
