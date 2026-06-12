@@ -32,6 +32,7 @@ my_raster = my_rasters[:, :, 1];
 
 CairoMakie.heatmap(my_raster)
 
+
 # Images.save("foo.png", my_rasters)
 # Images.save("foo.png", my_rasters[:, :, 1])
 
