@@ -42,6 +42,13 @@ boundary_raster = my_raster .&& .!interior
 
 my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)]
 
+# data_matrix = Matrix{Float64}(undef, 2, length(raw_pts))
+
+data_matrix = hcat([[deg2rad(p[1]), deg2rad(p[2])] for p in my_result]...)
+
+
+
+
 
 
 
