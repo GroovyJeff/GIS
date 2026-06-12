@@ -32,6 +32,19 @@ my_raster = my_rasters[:, :, 1];
 
 CairoMakie.heatmap(my_raster)
 
+using ImageMorphology
+
+se = strel_diamond((3, 3))
+
+interior = erode(my_raster, se)
+
+boundary_raster = my_raster .&& .!interior
+
+my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)]
+
+
+
+
 
 # Images.save("foo.png", my_rasters)
 # Images.save("foo.png", my_rasters[:, :, 1])
