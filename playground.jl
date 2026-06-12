@@ -26,7 +26,14 @@ my_data = GeoDataFrames.read(s)
 
 my_extent = Extents.Extent(X=(-180, 180), Y=(-90, 90))
 
-my_rasters =  Rasters.boolmask(my_data; to = my_extent, size=(w,h), collapse = false, boundary=:touches);
+my_rasters =  Rasters.boolmask(my_data; to = my_extent, size=(h,w), collapse = false, boundary=:touches);
+
+my_raster = my_rasters[:, :, 1];
+
+CairoMakie.heatmap(my_raster)
+
+# Images.save("foo.png", my_rasters)
+# Images.save("foo.png", my_rasters[:, :, 1])
 
 optional(1, pwd())
 
