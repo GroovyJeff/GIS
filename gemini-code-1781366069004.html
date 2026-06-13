@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet + FlatGeobuf Map</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+        #loading {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: sans-serif;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">Loading FlatGeobuf data...</div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/flatgeobuf@3.33.0/dist/flatgeobuf-geojson.min.js"></script>
+
+    <script>
+        // 1. Initialize the Leaflet Map
+        // Starting coordinates set to a generic global view; the map will auto-center later.
+        const map = L.map('map').setView([0, 0], 2);
+
+        // 2. Add OpenStreetMap Base Layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 3. Define the path to your FlatGeobuf file
+        // REPLACE THIS with the actual URL or relative path to your .fgb file
+        const fgbUrl = 'my_map.fgb'; 
+
+        // 4. Stream and Deserialize the FlatGeobuf Data
+        async function loadFlatGeobuf() {
+            try {
+                // flatgeobuf.deserialize dynamically streams binary map features 
+                // and outputs them as standard GeoJSON objects on the fly
+                const response = flatgeobuf.deserialize(fgbUrl);
+                
+                // Create an empty Leaflet GeoJSON layer to hold incoming features
+                const geojsonLayer = L.geoJSON(null, {
+                    style: function () {
+                        return {
+                            color: '#ff7800',
+                            weight: 2,
+                            opacity: 0.8,
+                            fillColor: '#ff7800',
+                            fillOpacity: 0.2
+                        };
+                    }
+                }).addTo(map);
+
+                // Iterate over the stream as chunks arrive
+                for await (const feature of response) {
+                    geojsonLayer.addData(feature);
+                }
+
+                // Hide the loading message once the stream finishes loading features
+                document.getElementById('loading').style.display = 'none';
+
+                // Automatically zoom and pan the map to fit your vector data bounds
+                if (geojsonLayer.getBounds().isValid()) {
+                    map.fitBounds(geojsonLayer.getBounds());
+                }
+
+            } catch (error) {
+                console.error("Error loading FlatGeobuf file:", error);
+                document.getElementById('loading').innerText = "Error loading map data.";
+            }
+        }
+
+        // Run the loader function
+        loadFlatGeobuf();
+    </script>
+</body>
+</html>
