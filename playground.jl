@@ -51,6 +51,25 @@ boundary_raster = my_raster .&& .!interior;
 
 my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)];
 
+data_matrix = hcat([[p[1], p[2]] for p in my_result]...);
+
+tree = BallTree(data_matrix, Haversine(1.0))
+
+lngs = LinRange(-180, 180, 100)
+lats = LinRange(-90, 90, 100)
+
+query_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
+
+nn(tree, query_matrix)
+
+# data_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
+
+# tree = BallTree(data_matrix, Haversine(1.0))
+
+
+coord_grid = [[x, y] for x in lngs, y in lats];
+
+tree = BallTree(coord_grid, Haversine(1.0))
 
 # data_matrix = Matrix{Float64}(undef, 2, length(raw_pts))
 
@@ -70,8 +89,6 @@ tree = BallTree(data_matrix, Haversine(1.0))
 nn(tree, [90, 0])
 
 
-dx = 360.0 / 16384
-dy = 180.0 / 8192
 
 x_range = deg2rad.((-180.0 + dx/2):dx:(180.0 - dx/2))
 y_range = deg2rad.((-90.0 + dy/2):dy:(80.0 - dy/2))
