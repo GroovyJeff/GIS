@@ -1,0 +1,6 @@
+#= TIMESTAMP 20260613.084712
+
+# rasterize canadian provinces (all in one TIF) at 16384 x 8192
+
+gdal_rasterize -co "COMPRESS=DEFLATE" -co "BIGTIFF=YES" -co "TILED=YES" -burn 1 -at -ts 16384 8192 -te -180 -90 180 90 /vsizip/GADM/gadm41_CAN_shp.zip/gadm41_CAN_1.shp temp1
+
