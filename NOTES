@@ -8,5 +8,13 @@ TODO: explain how/where to get maps and how to convert them to PNG
 
 TODO: explain the .png.aux.xml files (and how they are identical and could be symlinks)
 
+Quoting @doc Haversine:
 
+  Haversine(radius=6_371_000)
 
+  The haversine distance between two locations on a sphere of given radius,
+  whose default value is 6,371,000, i.e., the Earth's (volumetric) mean radius
+  in meters; cf. NASA's Earth Fact Sheet.
+
+  Locations are described with longitude and latitude in degrees. The computed
+  distance has the unit of the radius.
