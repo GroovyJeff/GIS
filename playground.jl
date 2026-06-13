@@ -58,13 +58,16 @@ my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)]
 
 # flipped above, Haversine is lat, lng
 
-data_matrix = hcat([[deg2rad(p[2]), deg2rad(p[1])] for p in my_result]...);
+data_matrix = hcat([[p[2], p[1]] for p in my_result]...);
+
+data_matrix = hcat([[p[1], p[2]] for p in my_result]...);
+
 
 tree = BallTree(data_matrix, Haversine(1.0))
 
 # tests below
 
-nn(tree, [pi/2, 0])
+nn(tree, [90, 0])
 
 
 dx = 360.0 / 16384
