@@ -15,6 +15,7 @@ using Rasters
 using ImageMorphology
 using NearestNeighbors
 using Distances
+using ThreadsX
 
 # optional
 using CairoMakie
@@ -55,12 +56,27 @@ data_matrix = hcat([[p[1], p[2]] for p in my_result]...);
 
 tree = BallTree(data_matrix, Haversine(1.0))
 
-lngs = LinRange(-180, 180, 100)
-lats = LinRange(-90, 90, 100)
+lngs = LinRange(-180, 180, 1000)
+lats = LinRange(-90, 90, 1000)
 
-query_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
+# AI is wrong below
+# query_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
 
-nn(tree, query_matrix)
+query_matrix = hcat([[x, y] for x in lngs, y in lats]...)
+
+range = [size(query_matrix)[2]:-96:1; 1]
+
+chunks = [query_matrix[:, range[i]:range[i-1]] for i in 2:length(range)]
+
+@time ThreadsX.map(i -> nn(tree, i), chunks)
+
+
+
+# don't actually use this but it's cool
+
+# chunks = [s:(e - (e == 500 ? 0 : 1)) for (s, e) in zip([1:96:500; 500][1:end-1], [1:96:500; 500][2:end])]
+
+@time nn(tree, query_matrix)
 
 # data_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
 
