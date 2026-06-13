@@ -5,6 +5,61 @@
 include("mylib-import-lazy.jl")
 include("mylib.jl")
 
+#= TIMESTAMP 20260613.081041
+
+# let's try Voronoi diagram of Canadian provinces at low res first
+
+using GeoDataFrames
+using Extents
+using Rasters
+using ImageMorphology
+using NearestNeighbors
+using Distances
+using ThreadsX
+
+my_data = GeoDataFrames.read("/vsizip/GADM/gadm41_CAN_shp.zip/gadm41_CAN_1.shp")
+
+my_extent = Extents.Extent(X=(-180, 180), Y=(-90, 90))
+
+my_rasters =  Rasters.boolmask(my_data; to = my_extent, size=(8192,16384), collapse = false, boundary=:touches);
+
+# convolve each raster to get edges only
+
+my_outlines = [my_rasters[:,:,i] .&& .!erode(my_rasters[:, :, i]) for i in 1:size(my_rasters)[3]]
+
+my_pts = [DimensionalData.DimPoints(i)[findall(i)] for i in my_outlines];
+
+my_lens = first.(size.(my_pts))
+
+my_all_pts = vcat(my_pts...)
+
+data_matrix = hcat([[p[1], p[2]] for p in my_all_pts]...);
+
+# this means distance results will be in degrees
+
+tree = BallTree(data_matrix, Haversine(rad2deg(1)));
+
+lngs = LinRange(-180, 180, 1000)
+lats = LinRange(-90, 90, 1000)
+
+# AI is wrong below
+# query_matrix = reduce(hcat, [x, y] for x in lngs, y in lats)
+
+query_matrix = hcat([[x, y] for x in lngs, y in lats]...)
+
+range = [size(query_matrix)[2]:-96:1; 1]
+
+chunks = [query_matrix[:, range[i]:range[i-1]] for i in 2:length(range)]
+
+@time ThreadsX.map(i -> nn(tree, i), chunks);
+
+
+
+
+
+
+
+
 #= TIMESTAMP 20260610.072430
 
 # adding libs here for standalone
@@ -19,7 +74,7 @@ using ThreadsX
 
 # optional
 using CairoMakie
-
+using Plots
 
 # let's create a function takes a shapefile name and returns a matrix indicating category of each pixel
 
