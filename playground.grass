@@ -58,5 +58,10 @@ v.out.ogr --overwrite input=temp1_s output=temp1.fgb format=FlatGeobuf
 
 # v.out.ogr -c input=temp1_p output=my_map.fgb format=FlatGeobuf sql="SELECT ST_SnapToGrid(geometry, 0.01, 0.01) FROM temp1_p"
 
+v.generalize --overwrite input=temp1_p output=temp1_s method=douglas threshold=0.01
 
+v.generalize --overwrite input=temp1_p output=temp1_s method=douglas threshold=1
 
+v.info -ct temp1_s
+
+v.out.ascii input=temp1_s format=standard
