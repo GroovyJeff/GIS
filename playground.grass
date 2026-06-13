@@ -32,7 +32,31 @@ r.grow.distance --overwrite input=temp1 value=temp1_v distance=temp1_d metric=ge
 
 export GRASS_RENDER_IMMEDIATE=png
 
-d.rast temp1_v && feh map.png
+# I don't want git to catch it
+export GRASS_RENDER_FILE=temp.png
+
+d.rast temp1_v && feh temp.png
 
 r.to.vect input=temp1_v output=temp1_p type=area
+
+# smoothify?
+
+r.to.vect --overwrite -s input=temp1_v output=temp1_p type=area
+
+v.out.ogr input=temp1_p output=temp1.geojson format=GeoJSON
+
+v.out.ogr --overwrite input=temp1_p output=temp1.fgb format=FlatGeobuf
+
+v.out.ogr -c input=temp1_p output=my_map.geojson format=GeoJSON lco="COORDINATE_PRECISION=2"
+
+v.clean input=temp1_p output=temp1_s tool=snap threshold=0.01
+
+v.out.ogr --overwrite input=temp1_s output=temp1.fgb format=FlatGeobuf
+
+
+# v.out.ogr -c input=temp1_p output=my_map.geojson format=FlatGeoBuf lco="COORDINATE_PRECISION=2"
+
+# v.out.ogr -c input=temp1_p output=my_map.fgb format=FlatGeobuf sql="SELECT ST_SnapToGrid(geometry, 0.01, 0.01) FROM temp1_p"
+
+
 
