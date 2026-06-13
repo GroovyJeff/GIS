@@ -7,6 +7,19 @@ include("mylib.jl")
 
 #= TIMESTAMP 20260610.072430
 
+# adding libs here for standalone
+
+using GeoDataFrames
+using Extents
+using Rasters
+using ImageMorphology
+using NearestNeighbors
+using Distances
+
+# optional
+using CairoMakie
+
+
 # let's create a function takes a shapefile name and returns a matrix indicating category of each pixel
 
 # let's test with Canadian provinces using the /vsizip protocol
@@ -30,29 +43,29 @@ my_rasters =  Rasters.boolmask(my_data; to = my_extent, size=(h,w), collapse = f
 
 my_raster = my_rasters[:, :, 1];
 
-CairoMakie.heatmap(my_raster)
+# CairoMakie.heatmap(my_raster)
 
-using ImageMorphology
+se = strel_diamond((3, 3));
+interior = erode(my_raster, se);
+boundary_raster = my_raster .&& .!interior;
 
-se = strel_diamond((3, 3))
+my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)];
 
-interior = erode(my_raster, se)
-
-boundary_raster = my_raster .&& .!interior
-
-my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)]
 
 # data_matrix = Matrix{Float64}(undef, 2, length(raw_pts))
 
-data_matrix = hcat([[deg2rad(p[1]), deg2rad(p[2])] for p in my_result]...)
+# data_matrix = hcat([[deg2rad(p[1]), deg2rad(p[2])] for p in my_result]...)
 
 # flipped above, Haversine is lat, lng
 
-data_matrix = hcat([[deg2rad(p[2]), deg2rad(p[1])] for p in my_result]...)
-using NearestNeighbors
-using Distances
+data_matrix = hcat([[deg2rad(p[2]), deg2rad(p[1])] for p in my_result]...);
 
 tree = BallTree(data_matrix, Haversine(1.0))
+
+# tests below
+
+nn(tree, [pi/2, 0])
+
 
 dx = 360.0 / 16384
 dy = 180.0 / 8192
