@@ -2,5 +2,37 @@
 
 # rasterize canadian provinces (all in one TIF) at 16384 x 8192
 
-gdal_rasterize -co "COMPRESS=DEFLATE" -co "BIGTIFF=YES" -co "TILED=YES" -burn 1 -at -ts 16384 8192 -te -180 -90 180 90 /vsizip/GADM/gadm41_CAN_shp.zip/gadm41_CAN_1.shp temp1
+# AI suggests -3d to use FID but that doesn't really work
+
+# we need the +1 below so FID 0 doesn't end up as background
+
+gdal_rasterize -sql "SELECT FID+1 AS id FROM gadm41_CAN_1" -co "COMPRESS=DEFLATE" -co "BIGTIFF=YES" -co "TILED=YES" -a id -at -ts 16384 8192 -te -180 -90 180 90 /vsizip/GADM/gadm41_CAN_shp.zip/gadm41_CAN_1.shp temp1.tif
+
+# this is how to look at a shapefile wo spewing geometry
+
+ogrinfo -al -geom=NO /vsizip/GADM/gadm41_CAN_shp.zip/gadm41_CAN_1.shp
+
+# import it into grass
+
+r.import --overwrite input=temp1.tif output=temp1
+
+# make sure the GRASS region matches the image
+
+g.region raster=temp1
+
+# this optional command lets you look at it
+
+d.rast temp1
+
+# now, voronoi
+
+r.grow.distance --overwrite input=temp1 value=temp1_v distance=temp1_d metric=geodesic
+
+# doing this because wx window is slow on remote machine
+
+export GRASS_RENDER_IMMEDIATE=png
+
+d.rast temp1_v && feh map.png
+
+r.to.vect input=temp1_v output=temp1_p type=area
 
