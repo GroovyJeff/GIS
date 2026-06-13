@@ -46,8 +46,23 @@ my_result = DimensionalData.DimPoints(boundary_raster)[findall(boundary_raster)]
 
 data_matrix = hcat([[deg2rad(p[1]), deg2rad(p[2])] for p in my_result]...)
 
+# flipped above, Haversine is lat, lng
 
+data_matrix = hcat([[deg2rad(p[2]), deg2rad(p[1])] for p in my_result]...)
+using NearestNeighbors
+using Distances
 
+tree = BallTree(data_matrix, Haversine(1.0))
+
+dx = 360.0 / 16384
+dy = 180.0 / 8192
+
+x_range = deg2rad.((-180.0 + dx/2):dx:(180.0 - dx/2))
+y_range = deg2rad.((-90.0 + dy/2):dy:(80.0 - dy/2))
+
+query_points = [[x, y] for x in x_range, y in y_range]
+
+distance_grid = ThreadsX.map(pt -> knn(tree, pt, 1)[2][1], query_points)
 
 
 
