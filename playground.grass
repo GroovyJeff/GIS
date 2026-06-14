@@ -65,3 +65,18 @@ v.generalize --overwrite input=temp1_p output=temp1_s method=douglas threshold=1
 v.info -ct temp1_s
 
 v.out.ascii input=temp1_s format=standard
+
+#= TIMESTAMP 20260614.083009
+
+# set these g.gisenv variables (example: Australia)
+
+g.gisenv set="MAP_COUNTRY=AUS"
+g.gisenv set="MAP_WIDTH=16384"
+g.gisenv set="MAP_HEIGHT=8192"
+
+# create the TIF file we will read into GRASS
+
+# I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
+
+# because gdal_rasterize is an external program, I have to do the somewhat clutzy `g.gisenv get=` instead o
+
