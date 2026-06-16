@@ -1,0 +1,13 @@
+# this file, which is symlinked from ~/.config/feh/keys, lets me use different keys for feh
+
+# scroll using arrow keys
+
+scroll_left Left
+scroll_right Right
+scroll_up Up
+scroll_down Down
+
+# zoom in and out using z and Z
+
+zoom_in z
+zoom_out Z
