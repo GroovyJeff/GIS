@@ -115,9 +115,9 @@ g.region raster=$MAP_RASTER
 
 # create a distance map
 
-r.grow.distance --overwrite input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic
+r.grow.distance --overwrite input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
 
-
+r.contour --overwrite input=AUS_distance_raster_16384x8192 output=foo1 step=50000
 
 
 
