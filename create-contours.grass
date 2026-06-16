@@ -1,0 +1,50 @@
+# set these g.gisenv variables (example: Australia)
+
+g.gisenv set="MAP_COUNTRY=AUS"
+g.gisenv set="MAP_WIDTH=16384"
+g.gisenv set="MAP_HEIGHT=8192"
+
+# export to PNG instead of bringing up window
+
+g.gisenv set="GRASS_RENDER_IMMEDIATE=png"
+
+# these variables depend on other variables
+
+# these are builtin variables that determine resolution of d.rast (not sure they even work until they're exported to bash, same with GRASS_RENDER_IMMEDIATE)
+
+g.gisenv set="GRASS_RENDER_WIDTH=$(g.gisenv get=MAP_WIDTH)"
+g.gisenv set="GRASS_RENDER_HEIGHT=$(g.gisenv get=MAP_HEIGHT)"
+
+g.gisenv set="MAP_INPUT_FILE=/vsizip/GADM/gadm41_$(g.gisenv get=MAP_COUNTRY)_shp.zip/gadm41_$(g.gisenv get=MAP_COUNTRY)_0.shp"
+
+g.gisenv set="MAP_OUTPUT_FILE=$(g.gisenv get=MAP_COUNTRY)-$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)-outline.tif"
+
+g.gisenv set="MAP_RASTER=$(g.gisenv get=MAP_COUNTRY)_raster_$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)"
+
+g.gisenv set="MAP_DISTANCE_RASTER=$(g.gisenv get=MAP_COUNTRY)_distance_raster_$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)"
+
+# this is sort of klutzy: to make life easier, import these vars into the main name space
+
+eval $(g.gisenv -s)
+
+# create the TIF file we will read into GRASS
+
+# I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
+
+# the SQL gets just the boundaries
+
+gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT -dialect sqlite -sql "SELECT ST_Boundary(geometry) FROM gadm41_${MAP_COUNTRY}_0" $MAP_INPUT_FILE $MAP_OUTPUT_FILE
+
+# import into GRASS
+
+r.in.gdal --overwrite input=$MAP_OUTPUT_FILE output=$MAP_RASTER
+
+# set region to match raster
+
+g.region raster=$MAP_RASTER
+
+# create a distance map
+
+r.grow.distance --overwrite input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
+
+r.contour --overwrite input=AUS_distance_raster_16384x8192 output=foo1 step=50000
