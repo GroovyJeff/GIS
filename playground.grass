@@ -82,9 +82,8 @@ g.gisenv set="GRASS_RENDER_IMMEDIATE=png"
 
 # these are builtin variables that determine resolution of d.rast (not sure they even work until they're exported to bash, same with GRASS_RENDER_IMMEDIATE)
 
-g.gisenv set="GRASS_RENDER_WIDTH=`(g.gisenv get=MAP_WIDTH)`"
-g.gisenv set="GRASS_RENDER_HEIGHT=`(g.gisenv get=MAP_HEIGHT)`"
-
+g.gisenv set="GRASS_RENDER_WIDTH=$(g.gisenv get=MAP_WIDTH)"
+g.gisenv set="GRASS_RENDER_HEIGHT=$(g.gisenv get=MAP_HEIGHT)"
 
 g.gisenv set="MAP_INPUT_FILE=/vsizip/GADM/gadm41_$(g.gisenv get=MAP_COUNTRY)_shp.zip/gadm41_$(g.gisenv get=MAP_COUNTRY)_0.shp"
 
