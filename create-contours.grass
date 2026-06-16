@@ -33,7 +33,15 @@ eval $(g.gisenv -s)
 
 # the SQL gets just the boundaries
 
-gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT -dialect sqlite -sql "SELECT ST_Boundary(geometry) FROM gadm41_${MAP_COUNTRY}_0" $MAP_INPUT_FILE $MAP_OUTPUT_FILE
+if [ ! -f $MAP_OUTPUT_FILE ]; then
+
+ gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT -dialect sqlite -sql "SELECT ST_Boundary(geometry) FROM gadm41_${MAP_COUNTRY}_0" $MAP_INPUT_FILE $MAP_OUTPUT_FILE
+
+else
+
+ echo $MAP_OUTPUT_FILE already exists
+
+fi
 
 # import into GRASS
 
