@@ -57,6 +57,23 @@ r.in.gdal $OVERWRITE input=$MAP_OUTPUT_FILE output=$MAP_RASTER
 
 g.region raster=$MAP_RASTER
 
+# experiment outline since 0s are null
+
+r.mapcalc --overwrite "foo1 = $MAP_RASTER[0,1] + $MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,-1]"
+
+r.mapcalc --overwrite "foo1 = isnull($MAP_RASTER[0,1] + $MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,-1])"
+
+r.mapcalc --overwrite "foo1 = isnull($MAP_RASTER[0,1] + $MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,-1] + $MAP_RASTER)"
+
+r.mapcalc --overwrite "foo1 = if(isnull($MAP_RASTER[0,1] + $MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,-1]), $MAP_RASTER, null())"
+
+r.mapcalc --overwrite "foo1 = if($MAP_RASTER && (isnull($MAP_RASTER[0,1]) || isnull($MAP_RASTER[1,0]) || isnull($MAP_RASTER[-1,0]) || isnull($MAP_RASTER[0,-1])), 1, null())"
+
+# this appears to work:
+
+r.mapcalc --overwrite "foo1 = if(isnull($MAP_RASTER[0,1]) || isnull($MAP_RASTER[1,0]) || isnull($MAP_RASTER[-1,0]) || isnull($MAP_RASTER[0,-1]), $MAP_RASTER, null())"
+
+
 # create an outline map (TODO: make this more efficient: even if I use r.resamp.filter I need r.mapcalc to cleanup)
 
 r.mapcalc $OVERWRITE "$MAP_RASTER_OUTLINE = if(($MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,1] + $MAP_RASTER[0,-1]) < (4 * $MAP_RASTER), 1, null())"
