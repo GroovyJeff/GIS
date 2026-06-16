@@ -33,6 +33,9 @@ export MAP_RASTER=${MAP_BASE_NAME}_raster
 
 export MAP_DISTANCE_RASTER=${MAP_BASE_NAME}_distance
 
+export MAP_DISTANCE_RASTER_KM=${MAP_BASE_NAME}_distance_km
+
+
 # create the TIF file we will read into GRASS unless it already exists
 
 # I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
@@ -57,6 +60,12 @@ g.region raster=$MAP_RASTER
 
 r.grow.distance $OVERWRITE input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
 
+# change to km (this appears to be the only way to do this, sadly)
+
+# because no two points can be more than 20000km apart, I'm offsetting this to store it as UInt16 (not Int16)
+
+r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(32768+$MAP_DISTANCE_RASTER/1000.0)"
+
 r.out.gdal $OVERWRITE input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=3"
 
 r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2"
@@ -67,9 +76,20 @@ r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DI
 
 r.out.gdal -c $OVERWRITE -f type=Int16 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE" scale=0.001
 
+r.out.gdal -c $OVERWRITE -f type=Int16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
+
+r.out.gdal -c $OVERWRITE -f type=UInt16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
+
+
+#       -c
+#           Do not write GDAL standard colortable
+#           Only applicable to Byte or UInt16 data types
+
+
 
 
 
 # this command takes forever, temporarily commenting out
 
-# r.contour $OVERWRITE input=AUS_distance_raster_16384x8192 output=foo1 step=50000
+# r.contour $OVERWRITE input=$MAP_DISTANCE_RASTER_KM output=foo1 step=50
+
