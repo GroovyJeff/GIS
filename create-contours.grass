@@ -1,8 +1,8 @@
 # used g.gisenv to set environment variables earlier, but some don't work unless they're bash environment variables, so going bash across the board
 
-# these can be changed each time
+# these can be changed each time; country is now the first argument
 
-export MAP_COUNTRY=AUS
+export MAP_COUNTRY=$1
 export MAP_WIDTH=16384
 export MAP_HEIGHT=8192
 
@@ -40,11 +40,11 @@ export MAP_DISTANCE_RASTER_KM=${MAP_BASE_NAME}_distance_km
 
 # I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
 
-# the SQL gets just the boundaries
+# we need a filled in map to compute signed distance
 
-if [ ! -f $MAP_OUTPUT_FILE ]; then
+if [[ ! -f $MAP_OUTPUT_FILE || -n "$OVERWRITE" ]]; then
 
- gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT -dialect sqlite -sql "SELECT ST_Boundary(geometry) FROM gadm41_${MAP_COUNTRY}_0" $MAP_INPUT_FILE $MAP_OUTPUT_FILE
+ gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT $MAP_INPUT_FILE $MAP_OUTPUT_FILE
 
 fi
 
@@ -66,28 +66,7 @@ r.grow.distance $OVERWRITE input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metri
 
 r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(32768+$MAP_DISTANCE_RASTER/1000.0)"
 
-r.out.gdal $OVERWRITE input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=3"
-
-r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2"
-
-r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
-
-r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE" scale=0.001
-
-r.out.gdal -c $OVERWRITE -f type=Int16 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE" scale=0.001
-
-r.out.gdal -c $OVERWRITE -f type=Int16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
-
 r.out.gdal -c $OVERWRITE -f type=UInt16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
-
-
-#       -c
-#           Do not write GDAL standard colortable
-#           Only applicable to Byte or UInt16 data types
-
-
-
-
 
 # this command takes forever, temporarily commenting out
 
