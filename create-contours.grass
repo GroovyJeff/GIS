@@ -1,33 +1,35 @@
-# set these g.gisenv variables (example: Australia)
+# used g.gisenv to set environment variables earlier, but some don't work unless they're bash environment variables, so going bash across the board
 
-g.gisenv set="MAP_COUNTRY=AUS"
-g.gisenv set="MAP_WIDTH=16384"
-g.gisenv set="MAP_HEIGHT=8192"
+# these can be changed each time
 
-# export to PNG instead of bringing up window
+export MAP_COUNTRY=AUS
+export MAP_WIDTH=16384
+export MAP_HEIGHT=8192
 
-g.gisenv set="GRASS_RENDER_IMMEDIATE=png"
+# in general I don't want to overwrite existing files, but this lets me change things globally if necessary (change to "--overwrite" to overwrite)
+
+export OVERWRITE=""
+
+# export to PNG instead of bringing up window (TODO: put this grassrc?)
+
+export GRASS_RENDER_IMMEDIATE=png
 
 # these variables depend on other variables
 
-# these are builtin variables that determine resolution of d.rast (not sure they even work until they're exported to bash, same with GRASS_RENDER_IMMEDIATE)
+# these are builtin variables that determine resolution of d.rast
 
-g.gisenv set="GRASS_RENDER_WIDTH=$(g.gisenv get=MAP_WIDTH)"
-g.gisenv set="GRASS_RENDER_HEIGHT=$(g.gisenv get=MAP_HEIGHT)"
+export GRASS_RENDER_WIDTH=$MAP_WIDTH
+export GRASS_RENDER_HEIGHT=$MAP_HEIGHT
 
-g.gisenv set="MAP_INPUT_FILE=/vsizip/GADM/gadm41_$(g.gisenv get=MAP_COUNTRY)_shp.zip/gadm41_$(g.gisenv get=MAP_COUNTRY)_0.shp"
+export MAP_INPUT_FILE=/vsizip/GADM/gadm41_${MAP_COUNTRY}_shp.zip/gadm41_${MAP_COUNTRY}_0.shp
 
-g.gisenv set="MAP_OUTPUT_FILE=$(g.gisenv get=MAP_COUNTRY)-$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)-outline.tif"
+export MAP_OUTPUT_FILE=${MAP_COUNTRY)-${MAP_WIDTH}x${MAP_HEIGHT}-outline.tif
 
-g.gisenv set="MAP_RASTER=$(g.gisenv get=MAP_COUNTRY)_raster_$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)"
+export MAP_RASTER=${MAP_COUNTRY}_raster_${MAP_WIDTH}x${MAP_HEIGHT}
 
-g.gisenv set="MAP_DISTANCE_RASTER=$(g.gisenv get=MAP_COUNTRY)_distance_raster_$(g.gisenv get=MAP_WIDTH)x$(g.gisenv get=MAP_HEIGHT)"
+export MAP_DISTANCE_RASTER=${MAP_COUNTRY)_distance_raster_${MAP_WIDTH)x${MAP_HEIGHT)
 
-# this is sort of klutzy: to make life easier, import these vars into the main name space
-
-eval $(g.gisenv -s)
-
-# create the TIF file we will read into GRASS
+# create the TIF file we will read into GRASS unless it alread exists
 
 # I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
 
@@ -37,15 +39,11 @@ if [ ! -f $MAP_OUTPUT_FILE ]; then
 
  gdal_rasterize -te -180 -90 180 90 -burn 1 -of GTiff -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "BIGTIFF=YES" -co "TILED=YES" -at -ts $MAP_WIDTH $MAP_HEIGHT -dialect sqlite -sql "SELECT ST_Boundary(geometry) FROM gadm41_${MAP_COUNTRY}_0" $MAP_INPUT_FILE $MAP_OUTPUT_FILE
 
-else
-
- echo $MAP_OUTPUT_FILE already exists
-
 fi
 
 # import into GRASS
 
-r.in.gdal --overwrite input=$MAP_OUTPUT_FILE output=$MAP_RASTER
+r.in.gdal $OVERWRITE input=$MAP_OUTPUT_FILE output=$MAP_RASTER
 
 # set region to match raster
 
@@ -53,6 +51,8 @@ g.region raster=$MAP_RASTER
 
 # create a distance map
 
-r.grow.distance --overwrite input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
+r.grow.distance $OVERWRITE input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
 
-r.contour --overwrite input=AUS_distance_raster_16384x8192 output=foo1 step=50000
+# this command takes forever, temporarily commenting out
+
+# r.contour $OVERWRITE input=AUS_distance_raster_16384x8192 output=foo1 step=50000
