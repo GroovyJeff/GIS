@@ -14,22 +14,26 @@ export OVERWRITE=""
 
 export GRASS_RENDER_IMMEDIATE=png
 
-# these variables depend on other variables
-
 # these are builtin variables that determine resolution of d.rast
 
 export GRASS_RENDER_WIDTH=$MAP_WIDTH
 export GRASS_RENDER_HEIGHT=$MAP_HEIGHT
 
+# this is the base name for many other variables: avoiding hyphens and dots because they only work sometimes in GRASS, using underscore instead
+
+export MAP_BASE_NAME=${MAP_COUNTRY}_${MAP_WIDTH}_${MAP_HEIGHT}
+
+# the shapefile for this country as a whole
+
 export MAP_INPUT_FILE=/vsizip/GADM/gadm41_${MAP_COUNTRY}_shp.zip/gadm41_${MAP_COUNTRY}_0.shp
 
-export MAP_OUTPUT_FILE=${MAP_COUNTRY)-${MAP_WIDTH}x${MAP_HEIGHT}-outline.tif
+export MAP_OUTPUT_FILE=${MAP_BASE_NAME}_outline.tif
 
-export MAP_RASTER=${MAP_COUNTRY}_raster_${MAP_WIDTH}x${MAP_HEIGHT}
+export MAP_RASTER=${MAP_BASE_NAME}_raster
 
-export MAP_DISTANCE_RASTER=${MAP_COUNTRY)_distance_raster_${MAP_WIDTH)x${MAP_HEIGHT)
+export MAP_DISTANCE_RASTER=${MAP_BASE_NAME}_distance
 
-# create the TIF file we will read into GRASS unless it alread exists
+# create the TIF file we will read into GRASS unless it already exists
 
 # I can't use v.to.rast here, because, even with -d for densify, it misses some pixels that gdal_rasterize -at gets
 
