@@ -57,6 +57,19 @@ g.region raster=$MAP_RASTER
 
 r.grow.distance $OVERWRITE input=$MAP_RASTER distance=$MAP_DISTANCE_RASTER metric=geodesic -m
 
+r.out.gdal $OVERWRITE input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=3"
+
+r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2"
+
+r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
+
+r.out.gdal -c $OVERWRITE -f type=Int32 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE" scale=0.001
+
+r.out.gdal -c $OVERWRITE -f type=Int16 input=$MAP_DISTANCE_RASTER output=$MAP_DISTANCE_RASTER.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE" scale=0.001
+
+
+
+
 # this command takes forever, temporarily commenting out
 
 # r.contour $OVERWRITE input=AUS_distance_raster_16384x8192 output=foo1 step=50000
