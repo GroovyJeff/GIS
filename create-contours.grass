@@ -31,10 +31,11 @@ export MAP_OUTPUT_FILE=${MAP_BASE_NAME}_outline.tif
 
 export MAP_RASTER=${MAP_BASE_NAME}_raster
 
+export MAP_RASTER_OUTLINE=${MAP_BASE_NAME}_raster_outline
+
 export MAP_DISTANCE_RASTER=${MAP_BASE_NAME}_distance
 
 export MAP_DISTANCE_RASTER_KM=${MAP_BASE_NAME}_distance_km
-
 
 # create the TIF file we will read into GRASS unless it already exists
 
@@ -55,6 +56,12 @@ r.in.gdal $OVERWRITE input=$MAP_OUTPUT_FILE output=$MAP_RASTER
 # set region to match raster
 
 g.region raster=$MAP_RASTER
+
+# create an outline map (TODO: make this more efficient: even if I use r.resamp.filter I need r.mapcalc to cleanup)
+
+r.mapcalc $OVERWRITE "$MAP_RASTER_OUTLINE = if(($MAP_RASTER[1,0] + $MAP_RASTER[-1,0] + $MAP_RASTER[0,1] + $MAP_RASTER[0,-1]) < (4 * $MAP_RASTER), 1, null())"
+
+r.mapcalc $OVERWRITE "$MAP_RASTER_OUTLINE = if(isnull($MAP_RASTER) && ($MAP_RASTER[1,0] || $MAP_RASTER[-1,0] || $MAP_RASTER[0,1] || $MAP_RASTER[0,-1]), 1, null())"
 
 # create a distance map
 
