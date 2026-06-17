@@ -59,19 +59,28 @@ g.region raster=$MAP_RASTER
 
 # create outline (TODO: can I do this better?)
 
-r.mapcalc --overwrite "$MAP_RASTER_OUTLINE = if(isnull($MAP_RASTER[0,1]) || isnull($MAP_RASTER[1,0]) || isnull($MAP_RASTER[-1,0]) || isnull($MAP_RASTER[0,-1]), $MAP_RASTER, null())"
+# this creates an outline map by nulling points that are surrounded on 4 sides by existing points; it also assigns a unique value to each outline point so we can ask "which outline point is closest to a given value"
 
-# create a distance map
+r.mapcalc $OVERWRITE "$MAP_RASTER_OUTLINE = if(isnull($MAP_RASTER[0,1]) || isnull($MAP_RASTER[1,0]) || isnull($MAP_RASTER[-1,0]) || isnull($MAP_RASTER[0,-1]), $MAP_RASTER*(row()*ncols()+col()), null())"
 
-r.grow.distance $OVERWRITE input=$MAP_RASTER_OUTLINE distance=$MAP_DISTANCE_RASTER metric=geodesic -m
+# create a distance map and keep track of value
+
+r.grow.distance $OVERWRITE input=$MAP_RASTER_OUTLINE distance=$MAP_DISTANCE_RASTER metric=geodesic value=${MAP_BASE_NAME}_value -m
 
 # change to km (this appears to be the only way to do this, sadly)
 
 # because no two points can be more than 20000km apart, I'm offsetting this to store it as UInt16 (not Int16)
 
-r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(32768+$MAP_DISTANCE_RASTER/1000.0)"
+# adding the multiplier of -1 for internal points since this signed distance
+
+r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(32768+ if(isnull($MAP_RASTER), 1, -1)*$MAP_DISTANCE_RASTER/1000.0)"
 
 r.out.gdal -c $OVERWRITE -f type=UInt16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
+
+# very low res for testing
+
+r.contour $OVERWRITE input=$MAP_DISTANCE_RASTER_KM output=${MAP_BASE_NAME}_contour step=500
+
 
 # this command takes forever, temporarily commenting out
 
