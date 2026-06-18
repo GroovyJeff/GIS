@@ -73,7 +73,9 @@ r.grow.distance $OVERWRITE input=$MAP_RASTER_OUTLINE distance=$MAP_DISTANCE_RAST
 
 # adding the multiplier of -1 for internal points since this signed distance
 
-r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(32768+ if(isnull($MAP_RASTER), 1, -1)*$MAP_DISTANCE_RASTER/1000.0)"
+# we add 30000 (not 32768) so r.contour will render in units of 500km without offset
+
+r.mapcalc $OVERWRITE "$MAP_DISTANCE_RASTER_KM = round(30000+ if(isnull($MAP_RASTER), 1, -1)*$MAP_DISTANCE_RASTER/1000.0)"
 
 r.out.gdal -c $OVERWRITE -f type=UInt16 input=$MAP_DISTANCE_RASTER_KM output=$MAP_DISTANCE_RASTER_KM.tif format=GTiff createopt="COMPRESS=DEFLATE,BIGTIFF=YES,TILED=YES,ZLEVEL=9,PREDICTOR=2,PROFILE=BASELINE"
 
@@ -81,6 +83,7 @@ r.out.gdal -c $OVERWRITE -f type=UInt16 input=$MAP_DISTANCE_RASTER_KM output=$MA
 
 r.contour $OVERWRITE input=$MAP_DISTANCE_RASTER_KM output=${MAP_BASE_NAME}_contour step=500
 
+v.out.ogr $OVERWRITE input=${MAP_BASE_NAME}_contour output=my_web_map.geojson format=GeoJSON lco="COORDINATE_PRECISION=2"
 
 # this command takes forever, temporarily commenting out
 
