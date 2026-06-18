@@ -1,7 +1,24 @@
-# don't push emacs droppings/tempfiles nor symlink to GADM directory
+# don't push emacs droppings/tempfiles
 *~
 \#*\#
 \.\#*
+
+# the GADM directory contains large shapefiles we can't push
+
 GADM
+
+# By convention, anything named temp is not pushed
+
 /temp
 temp*
+
+# TIF files are almost always going to be too big to push and their .aux.xml aren't useful without them
+
+*\.tif
+*\.tif\.aux\.xml
+
+# these are fixed names used by GRASS GIS and AI and shouldn't be pushed: I will use more descriptive names if pushing something important
+
+map\.png
+my_map\.geojson
+my_web_map\.geojson
