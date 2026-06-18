@@ -27,6 +27,8 @@ export MAP_BASE_NAME=${MAP_COUNTRY}_${MAP_WIDTH}_${MAP_HEIGHT}
 
 export MAP_INPUT_FILE=/vsizip/GADM/gadm41_${MAP_COUNTRY}_shp.zip/gadm41_${MAP_COUNTRY}_0.shp
 
+# TODO: the map created by gdal_raster below is no longer an outline, so this naming is misleading
+
 export MAP_OUTPUT_FILE=${MAP_BASE_NAME}_outline.tif
 
 export MAP_RASTER=${MAP_BASE_NAME}_raster
