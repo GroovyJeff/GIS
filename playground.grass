@@ -65,3 +65,19 @@ v.generalize --overwrite input=temp1_p output=temp1_s method=douglas threshold=1
 v.info -ct temp1_s
 
 v.out.ascii input=temp1_s format=standard
+
+#= TIMESTAMP 20260618.091441
+
+# create distance/value map where each pixel in *filled* polygon has its own value and then parse results in Julia (to allow multiple features to share a pixel)
+
+# this png has a png.aux.xml so we can pretend its gdal
+
+r.in.gdal --overwrite input=MAPS/gadm41-CAN.png output=test001
+
+# set g.region to match
+
+g.region raster=test001
+
+# create a map where 0 goes to null and everything else gets a unique value (note this is a 43200x21600 map)
+
+r.mapcalc "test002 = if(test001, row()*ncols()+col(), null())"
